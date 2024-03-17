@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVL</title>
+    <style>
+body {
+    font-family: Arial, sans-serif; /* 設置全局字體 */
+    margin: 0; /* 移除邊距 */
+    padding: 0; /* 移除內距 */
+    text-align: center; /* 全局文字置中 */
+    }
+
+.header {
+    display: flex;
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+}
+
+.header-section {
+    flex: 1; /* 确保每部分平等分配空间 */
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px; /* 调整为需要的间隙大小 */
+    margin-top: 10px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.select-container {
+    flex-basis: 30%; /* 每个选择区域占据容器宽度的30% */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center; /* 使标题和选择框文字居中 */
+    padding: 10px;
+    border: 1px solid #ccc; /* 可选：为选择区域添加边框 */
+    border-radius: 5px; /* 可选：边框圆角 */
+}
+
+.model-details {
+    /* 调整宽度以适应select-container的宽度 */
+    width: 100%;
+    margin-top: 10px;
+}
+
+
+h1, h2 {
+    margin-bottom: 20px; /* 標題下邊距 */
+}
+
+select, .model-details {
+    width: 200px; /* 選擇框和詳細信息區域的寬度 */
+    padding: 10px; /* 內距 */
+    border-radius: 5px; /* 邊框圓角 */
+    margin: 10px 0; /* 上下邊距 */
+}
+
+.model-details {
+    text-align: left; /* 詳細信息文字左對齊 */
+    display: block; /* 顯示詳細信息區域 */
+    width: 350px; /* 詳細信息區域的寬度 */
+    margin-top: 5px; /* 上邊距 */
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="header-section"> <!-- Logo的容器 -->
+        <img src="https://jetwayipc.com/wp-content/uploads/jetway-logo.png" alt="Jetway Logo" style="height: 70px;">
+    </div>
+    <div class="header-section title-container"> <!-- 标题的容器 -->
+        <h1>AVL</h1>
+    </div>
+    <div class="header-section"> <!-- 日期的容器 -->
+        <div id="date"></div>
+    </div>
+</div>
+	
+    <!-- Memory 选择区域 -->
+	<div class="container">
+    <div class="select-container">
+        <h2>Memory Module</h2>
+        <select id="memorySelect" onchange="fetchMemoryDetails()">
+            <option value="">Select a model...</option>
+        </select>
+        <div id="memoryDetails" class="model-details"></div>
+    </div>
+
+    <!-- SATA 选择区域 -->
+    <div class="select-container">
+        <h2>SATA SSD</h2>
+        <select id="sataSelect" onchange="fetchSataDetails()">
+            <option value="">Select a model...</option>
+        </select>
+        <div id="sataDetails" class="model-details"></div>
+    </div>
+
+    <!-- mSATA 选择区域 -->
+	    <div class="select-container">
+        <h2>mSATA SSD</h2>
+        <select id="msataSelect" onchange="fetchMSataDetails()">
+            <option value="">Select a model...</option>
+        </select>
+        <div id="msataDetails" class="model-details"></div>
+    </div>
+	
+    <!-- M2SATA 选择区域 -->
+        <div class="select-container">
+        <h2>M2SATA SSD</h2>
+        <select id="m2sataSelect" onchange="fetchM2SataDetails()">
+            <option value="">Select a model...</option>
+        </select>
+        <div id="m2sataDetails" class="model-details"></div>
+    </div>
+
+    <!-- M2PCIE 选择区域 -->
+	    <div class="select-container">
+        <h2>M2PCIE SSD</h2>
+        <select id="m2pcieSelect" onchange="fetchM2PcieDetails()">
+            <option value="">Select a model...</option>
+        </select>
+        <div id="m2pcieDetails" class="model-details"></div>
+    </div>
+
+	<!-- CPU 选择区域 -->
+        <div class="select-container">
+        <h2>CPU Sku</h2>
+        <select id="cpuSelect" onchange="fetchCpuDetails()">
+            <option value="">Select a model...</option>
+        </select>
+        <div id="cpuDetails" class="model-details"></div>
+    </div>
+	
+    <script>
+        document.getElementById('date').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        function fetchMemoryDetails() {
+            const modelSelect = document.getElementById('memorySelect');
+            const model = modelSelect.value;
+            const detailsDiv = document.getElementById('memoryDetails');
+            if (!model) {
+                detailsDiv.style.display = 'none';
+                return;
+            }
+            fetch(`/model-details?model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+                    detailsDiv.innerHTML = '';
+                    for (const [key, value] of Object.entries(data)) {
+                        detailsDiv.innerHTML += `<p>${key}: ${value}</p>`;
+                    }
+                    detailsDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    detailsDiv.innerHTML = 'Error loading model details';
+                    console.error('Error:', error);
+                    detailsDiv.style.display = 'block';
+                });
+        }
+
+        function fetchSataDetails() {
+            const sataSelect = document.getElementById('sataSelect');
+            const model = sataSelect.value;
+            const detailsDiv = document.getElementById('sataDetails');
+            if (!model) {
+                detailsDiv.style.display = 'none';
+                return;
+            }
+            fetch(`/sata-details?model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+                    detailsDiv.innerHTML = '';
+                    for (const [key, value] of Object.entries(data)) {
+                        detailsDiv.innerHTML += `<p>${key}: ${value}</p>`;
+                    }
+                    detailsDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    detailsDiv.innerHTML = 'Error loading SATA model details';
+                    console.error('Error:', error);
+                    detailsDiv.style.display = 'block';
+                });
+        }
+        function fetchMSataDetails() {
+        const msataSelect = document.getElementById('msataSelect');
+        const model = msataSelect.value;
+        const detailsDiv = document.getElementById('msataDetails');
+            if (!model) {
+                 detailsDiv.style.display = 'none';
+                return;
+            }
+            fetch(`/msata-details?model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+            detailsDiv.innerHTML = '';
+            for (const [key, value] of Object.entries(data)) {
+                detailsDiv.innerHTML += `<p>${key}: ${value}</p>`;
+            }
+            detailsDiv.style.display = 'block';
+                })
+        .catch(error => {
+            detailsDiv.innerHTML = 'Error loading mSATA model details';
+            console.error('Error:', error);
+            detailsDiv.style.display = 'block';
+                });
+        }
+        function fetchM2SataDetails() {
+        const m2sataSelect = document.getElementById('m2sataSelect');
+        const model = m2sataSelect.value;
+        const detailsDiv = document.getElementById('m2sataDetails');
+            if (!model) {
+                 detailsDiv.style.display = 'none';
+                return;
+            }
+            fetch(`/m2sata-details?model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+            detailsDiv.innerHTML = '';
+            for (const [key, value] of Object.entries(data)) {
+                detailsDiv.innerHTML += `<p>${key}: ${value}</p>`;
+            }
+            detailsDiv.style.display = 'block';
+        })
+        .catch(error => {
+            detailsDiv.innerHTML = 'Error loading m2SATA model details';
+            console.error('Error:', error);
+            detailsDiv.style.display = 'block';
+			
+		  });
+        }	
+		function fetchM2PcieDetails() {
+        const m2pcieSelect = document.getElementById('m2pcieSelect');
+        const model = m2pcieSelect.value;
+        const detailsDiv = document.getElementById('m2pcieDetails');
+            if (!model) {
+                 detailsDiv.style.display = 'none';
+                return;
+            }
+            fetch(`/m2pcie-details?model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+            detailsDiv.innerHTML = '';
+            for (const [key, value] of Object.entries(data)) {
+                detailsDiv.innerHTML += `<p>${key}: ${value}</p>`;
+            }
+            detailsDiv.style.display = 'block';
+        })
+        .catch(error => {
+            detailsDiv.innerHTML = 'Error loading m2pcie model details';
+            console.error('Error:', error);
+            detailsDiv.style.display = 'block';
+			
+		  });
+        }	
+		function fetchCpuDetails() {
+        const cpuSelect = document.getElementById('cpuSelect');
+        const model = cpuSelect.value;
+        const detailsDiv = document.getElementById('cpuDetails');
+            if (!model) {
+                 detailsDiv.style.display = 'none';
+                return;
+            }
+            fetch(`/cpu-details?model=${encodeURIComponent(model)}`)
+                .then(response => response.json())
+                .then(data => {
+            detailsDiv.innerHTML = '';
+            for (const [key, value] of Object.entries(data)) {
+                detailsDiv.innerHTML += `<p>${key}: ${value}</p>`;
+            }
+            detailsDiv.style.display = 'block';
+        })
+        .catch(error => {
+            detailsDiv.innerHTML = 'Error loading cpu model details';
+            console.error('Error:', error);
+            detailsDiv.style.display = 'block';
+			
+		  });
+        }	
+        window.onload = async () => {
+		    // 加载 mSATA 模型
+            const memoryResponse = await fetch('/models');
+            const memoryModels = await memoryResponse.json();
+            const memorySelect = document.getElementById('memorySelect');
+            memorySelect.innerHTML = '<option value="">Select a model...</option>';
+            memoryModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                memorySelect.appendChild(option);
+            });
+            // 加载 mSATA 模型
+            const sataResponse = await fetch('/sata-models');
+            const sataModels = await sataResponse.json();
+            const sataSelect = document.getElementById('sataSelect');
+            sataSelect.innerHTML = '<option value="">Select a model...</option>';
+            sataModels.forEach(model => {
+                const option = new Option(model, model);
+                sataSelect.add(option);
+            });
+			// 加载 mSATA 模型
+            const msataResponse = await fetch('/msata-models'); // 确保 server.js 中有对应端点
+            const msataModels = await msataResponse.json();
+            const msataSelect = document.getElementById('msataSelect');
+            msataSelect.innerHTML = '<option value="">Select a model...</option>';
+            msataModels.forEach(model => {
+            const option = new Option(model, model);
+            msataSelect.add(option);
+            });
+			// 加载 m2SATA 模型
+            const m2sataResponse = await fetch('/m2sata-models'); // 确保 server.js 中有对应端点
+            const m2sataModels = await m2sataResponse.json();
+            const m2sataSelect = document.getElementById('m2sataSelect');
+            m2sataSelect.innerHTML = '<option value="">Select a model...</option>';
+            m2sataModels.forEach(model => {
+            const option = new Option(model, model);
+            m2sataSelect.add(option);
+            });
+            // 加载 m2PCIE 模型
+            const m2pcieResponse = await fetch('/m2pcie-models'); // 确保 server.js 中有对应端点
+            const m2pcieModels = await m2pcieResponse.json();
+            const m2pcieSelect = document.getElementById('m2pcieSelect');
+            m2pcieSelect.innerHTML = '<option value="">Select a model...</option>';
+            m2pcieModels.forEach(model => {
+            const option = new Option(model, model);
+            m2pcieSelect.add(option);
+            });
+			// 加载 CPU 模型
+            const cpuResponse = await fetch('/cpu-models'); // 确保 server.js 中有对应端点
+            const cpuModels = await cpuResponse.json();
+            const cpuSelect = document.getElementById('cpuSelect');
+            cpuSelect.innerHTML = '<option value="">Select a model...</option>';
+            cpuModels.forEach(model => {
+            const option = new Option(model, model);
+            cpuSelect.add(option);
+            });
+        };
+    </script>
+</body>
+</html>
